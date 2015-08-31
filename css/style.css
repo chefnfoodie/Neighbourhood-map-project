@@ -1,0 +1,130 @@
+ 
+ html, body {
+        height: 100%;
+        margin: 0;
+        padding: 0;
+      }
+
+      
+      #map {
+        margin-top: 20px;
+        margin-left: 12px;
+        margin-right: 20px; 
+        height: 100%;
+        width: 100%; 
+
+      }
+
+      .weatherBox {
+
+  border: 1px solid transparent;
+  border-radius: 2px 0 0 2px;
+  box-sizing: border-box;
+  -moz-box-sizing: border-box;
+  
+  outline: none;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.3);
+
+
+        padding-left: 2px;
+        padding-right: 2px;
+        margin-top: 3px;
+        margin-left: 3px;
+        margin-right: 3px;
+        background-color: #FFF5EE none repeat scroll 0% 0%;
+        overflow: scroll;
+        width: 95%;
+        height: auto;
+        
+        transition: box-shadow 0.3s, border 0.3s;
+         font-family: Roboto;
+
+       
+       }
+
+      #weatherResults {
+        padding-left: 2px;
+        padding-right: 2px;
+        box-shadow: 0px 2px 6px rgb(175, 57, 79);
+        border-radius: 3px;
+        position: fixed;
+        top: 30%;
+        height: 50%;
+        left: 70%;
+        width: 25%;
+        margin-right: 75%;
+        background-color: #FFF8DC;
+        overflow: scroll;
+        z-index: 2;
+      }
+
+.controls {
+  margin-top: 10px;
+  border: 1px solid transparent;
+  border-radius: 2px 0 0 2px;
+  box-sizing: border-box;
+  -moz-box-sizing: border-box;
+  height: 32px;
+  outline: none;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.3);
+}
+#topcontainer {
+
+ position: relative;
+}
+
+#filterView { 
+ 
+  border: 1px solid transparent;
+  font-family: Roboto;
+  width: 30%;
+  height: 32px;
+  margin-top: 10px;
+  font-size: 15px;
+  font-weight: 300;
+}
+
+#filterView:focus {
+  border-color: #4d90fe;
+}
+
+
+#pac-input {
+
+ border: 1px solid transparent;
+  font-family: Roboto;
+  width: 30%;
+  height: 32px;
+  margin-left: 10px;
+  top: 20px;
+  font-size: 15px;
+  font-weight: 300;
+  text-overflow: ellipsis;
+ 
+  
+}
+
+#pac-input:focus {
+  border-color: #4d90fe;
+}
+
+.pac-container {
+  font-family: Roboto;
+}
+
+
+
+#target {
+        width: 345px;
+      }
+#type-selector {
+  color: #fff;
+  background-color: #4d90fe;
+  padding: 5px 11px 0px 11px;
+}
+
+#type-selector label {
+  font-family: Roboto;
+  font-size: 13px;
+  font-weight: 300;
+}

@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="en">
+
+  <head>
+    <meta name="viewport" content="initial-scale=1.0, user-scalable=no">
+  <meta charset="utf-8">
+  <link rel="stylesheet" href="css/style.css">
+  </head>
+  <title>
+    Neighbourhood map project
+  </title>
+   <script src="js/lib/jquery.min.js"></script>
+   <script src="https://maps.googleapis.com/maps/api/js?libraries=places"></script>
+   <script src="js/lib/knockout-3.2.0.js"></script>
+  <script src="https://code.jquery.com/ui/1.11.4/jquery-ui.js"></script>
+    <link rel="stylesheet" href="https://code.jquery.com/ui/1.11.4/themes/smoothness/jquery-ui.css">
+
+</head>
+
+<body>
+
+
+  <!--
+<div data-bind="with: currentLocation">
+<select id="listView"  data-bind = "foreach: placeList, click: marker">
+-->
+
+
+  <div id="topcontainer">
+    <!--
+<form data-bind="submit: funcPlace">
+
+<input id="pac-input" class="controls" type="text" placeholder="Select your location" data-bind='value: placeToAdd, valueUpdate: "afterkeydown", click : "onSearch" '>
+-->
+
+
+    <input id="pac-input" class="controls" type="text" placeholder="Select your location" data-bind="value: currentplace, event: {keypress: onSearch}, valueUpdate: 'afterkeydown'" />
+
+    <!--
+    <button type="button" data-bind="click: onSearch">Click me</button>
+  -->
+    <input  id="filterView" class="controls" type="text" placeholder="Filter the results" data-bind="foreach: placeList, value: selectedPlace, event: {keyup: filterResults}, valueUpdate: 'keyup'">
+</input>
+
+
+  </div>
+
+
+  <div id="map">
+
+  </div>
+
+  <div id="weatherResults">
+
+  </div>
+
+
+
+  <!--<script src="https://maps.googleapis.com/maps/api/js?libraries=places&callback=initAutocomplete" async defer>
+-->
+
+
+ <script src="js/app.js"></script>
+
+
+
+
+</body>
+
+</html>
