@@ -11,7 +11,7 @@ The objective of this project is to search for a location and with the help of G
 * Type a place or select a place in the search box. The map will zoom to the place. Hit the enter key to retrieve weather info. The markers will appear around the place and its nearby locations.
 * If typing a particular alphabet on the list view , the places suggested are as per the current neighborhood and on selecting the desired place and hitting enter key, marker corresponding to that place is shown bouncing and all other markers are rendered not visible. The appropriate coordinates and weather information of the selected place are displayed on the infowindow and the scrollable weather results box. The info of other places do not appear on the weather results box.
 * After applying filter, user can enter new location to display its info or enter blank/empty value to show all original markers and weather info.
-* If a place has already been selected from the list box and its marker is bouncing with its infowindow open, on clicking a new place from the list, the previous place marker and infowindow are rendered not visible.The new place marker is sen bouncing at its location with its corresponding infowindow open.
+* If a place has already been selected from the list box and its marker is bouncing with its infowindow open, on clicking a new place from the list, the previous place marker and infowindow are rendered not visible.The new place marker is seen bouncing at its location with its corresponding infowindow open.
 
 
 ####Part 3: Design
