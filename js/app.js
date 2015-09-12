@@ -1,4 +1,3 @@
-// Initialize Map for Vancouver, BC, CA cooridinates
 function initializeMap() {
     map = new google.maps.Map(document.getElementById('map'), {
         center: {
@@ -36,7 +35,7 @@ function loadInitialMapData(viewModel) {
     searchBox.addListener('places_changed', function() {
         var places = searchBox.getPlaces();
 
-        if (places.length == 0) {
+        if (places.length === 0) {
             return;
         }
 
@@ -82,23 +81,15 @@ function callWeatherAPI(viewModel) {
         url: requestString,
         dataType: 'text', // Choosing a text datatype
         success: function(apiresponse) {
-        proccessWeatherAPIResult(viewModel, apiresponse); },
+            proccessWeatherAPIResult(viewModel, apiresponse);
+        },
         error: function(XMLHttpRequest, textStatus, errorThrown) {
-        alert("Unable to load weather data now!"); }
-    }
-    );
+            alert("Unable to load weather data now!");
+        }
+    });
 }
 
-// Function to animate marker with bounce
-function toggleBounce() {
 
-    if (this.getAnimation() !== null) {
-        this.setAnimation(null);
-    } else {
-        this.setAnimation(google.maps.Animation.BOUNCE);
-    }
-
-}
 
 
 // Function to process weather API result
@@ -121,22 +112,22 @@ var proccessWeatherAPIResult = function(viewModel, apiresponse) {
 
     viewModel.placeList.removeAll();
     for (var i = 0; i < viewModel.placeList.length; i++) {
-        console.log("y");
         viewModel.placeList.pop();
     }
 
     var results = JSON.parse(apiresponse);
-    if (results.list != null && results.list.length > 0) {
+    if (results.list !== null && results.list.length > 0) {
         var bounds = new google.maps.LatLngBounds();
-        for (var i = 0; i < results.list.length; i++) {
-            var name = results.list[i].name;
+        var len = results.list.length;
+        for (var j = 0; j < len; j++) {
+            var name = results.list[j].name;
             // add to placeList
             viewModel.placeList.push(name);
-            var lat = results.list[i].coord.lat;
-            var lng = results.list[i].coord.lon;
-            var temp = results.list[i].main.temp;
-            var tempmax = results.list[i].main.temp_max;
-            var tempmin = results.list[i].main.temp_min;
+            var lat = results.list[j].coord.lat;
+            var lng = results.list[j].coord.lon;
+            var temp = results.list[j].main.temp;
+            var tempmax = results.list[j].main.temp_max;
+            var tempmin = results.list[j].main.temp_min;
 
             var textArea = document.createElement("Label");
             var weatherBox = apiResultBox.appendChild(textArea);
@@ -157,13 +148,14 @@ var proccessWeatherAPIResult = function(viewModel, apiresponse) {
                 data: contentString
             });
 
-            marker.addListener('mouseover', markerInfo);
-            marker.addListener('click', toggleBounce);
 
-            // Create a marker for each place.
-            map.markers.push(marker);
-            bounds.extend(myLatLng);
+            marker.addListener('click', function() {
+                toggleBounce(this);
+            });
 
+          // Create a marker for each place.
+          map.markers.push(marker);
+          bounds.extend(myLatLng);
         }
         map.fitBounds(bounds);
 
@@ -176,31 +168,54 @@ var proccessWeatherAPIResult = function(viewModel, apiresponse) {
     return viewModel.placeList;
 };
 
-// Function to display marker info window
-var markerInfo = function() {
-    var infowindow = new google.maps.InfoWindow({
-        content: this.data
-    });
-    infowindow.open(map, this);
 
-    this.addListener('mouseout', function() {
-        infowindow.close();
+function toggleBounce(marker) {
+    var infowindow = new google.maps.InfoWindow({
+        content: marker.data
     });
+    if (marker.getAnimation() !== null) {
+        marker.setAnimation(null);
+
+    }
+    else
+    {
+        marker.setAnimation(google.maps.Animation.BOUNCE);
+        infowindow.open(map, marker);
+        marker.addListener('click', function()
+        {
+            infowindow.close();
+        });
+    }
+}
+
+
+// Function to animate marker with bounce
+
+var markerInfo = function(marker) {
+
+    var infowindow = new google.maps.InfoWindow({
+        content: marker.data,
+        maxWidth: 120
+    });
+    if(marker.getAnimation() !== null) {
+        infowindow.open(map, marker);
+    }
+    else
+        infowindow.close();
 
 };
+
 
 // View model init
 var viewModel = function(initialLocation) {
 
     var self = this;
-    self.placeList = ko.observableArray([]);
+    self.placeList = ko.observableArray();
     self.currentplace = ko.observable(initialLocation);
     self.selectedPlace = ko.observable("");
     self.map = initializeMap();
     self.map.markers = [];
     loadInitialMapData(self);
-
-    var self = this;
 
     self.onSearch = function(data, event) {
         self.placeList.removeAll();
@@ -220,12 +235,12 @@ var viewModel = function(initialLocation) {
         // detect and handle only when enter key is pressed
         if (event.keyCode === 13) {
             map.markers.forEach(function(marker) {
-                console.log("inside marker");
-                if (self.selectedPlace() == '') {
+                if (self.selectedPlace() === '') {
                     marker.setVisible(true);
                 } else if (self.selectedPlace() != marker.title) {
-                    marker.setVisible(false)
+                    marker.setVisible(false);
                 } else {
+                    toggleBounce(marker);
                     marker.setVisible(true);
                 }
             });
@@ -235,12 +250,12 @@ var viewModel = function(initialLocation) {
         var results = document.getElementById("weatherResults").childNodes;
         // detect and handle only when enter key is pressed
         if (event.keyCode === 13) {
-            for (i = 0; i < results.length; i++) {
-                console.log("inside place..");
+            var resLen = results.length;
+            for (i = 0; i < resLen; i++) {
                 placeInfo = results[i];
 
                 title = placeInfo.getAttribute("title");
-                if (self.selectedPlace() == '') {
+                if (self.selectedPlace() === '') {
                     placeInfo.style.display = 'inline';
                 } else if (self.selectedPlace() != title) {
                     placeInfo.style.display = 'none';
@@ -251,7 +266,7 @@ var viewModel = function(initialLocation) {
         }
         return true;
     };
-// End - Intialization
+    // End - Intialization
 };
 
 

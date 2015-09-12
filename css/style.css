@@ -1,16 +1,16 @@
 html,
 body {
-    height: 100%;
+    height: 100vh;
     margin: 0;
     padding: 0;
 }
 
 #map {
-    margin-top: 20px;
-    margin-left: 12px;
-    margin-right: 20px;
-    height: 100%;
-    width: 100%;
+
+    margin: 20px 20px 0 12px;
+    height: 90vh;
+    width: 90vw;
+
 }
 
 .weatherBox {
@@ -22,12 +22,10 @@ body {
     box-shadow: 0 2px 6px rgba(0, 0, 0, 0.3);
     padding-left: 2px;
     padding-right: 2px;
-    margin-top: 3px;
-    margin-left: 3px;
-    margin-right: 3px;
+    margin: 3px 3px 0 3px;
     background-color: #fff5ee none repeat scroll 0 0;
     overflow: scroll;
-    width: 95%;
+    width: 95vw;
     height: auto;
     transition: box-shadow 0.3s, border 0.3s;
     font-family: Roboto;
@@ -39,11 +37,11 @@ body {
     box-shadow: 0 2px 6px rgb(175, 57, 79);
     border-radius: 3px;
     position: fixed;
-    top: 30%;
-    height: 50%;
-    left: 70%;
-    width: 25%;
-    margin-right: 75%;
+    top: 30vh;
+    height: 50vh;
+    left: 65vw;
+    width: 25vw;
+    margin-right: 75vw;
     background-color: #fff8dc;
     overflow: scroll;
     z-index: 2;
@@ -67,7 +65,7 @@ body {
 #filterView {
     border: 1px solid transparent;
     font-family: Roboto;
-    width: 30%;
+    width: 30vw;
     height: 32px;
     margin-top: 10px;
     font-size: 15px;
@@ -81,12 +79,12 @@ body {
 #pac-input {
     border: 1px solid transparent;
     font-family: Roboto;
-    width: 30%;
+    width: 30vw;
     height: 32px;
     margin-left: 10px;
     top: 20px;
     font-size: 15px;
-    font-weight: 300;
+    font-weight: 300px;
     text-overflow: ellipsis;
 }
 
@@ -113,3 +111,5 @@ body {
     font-size: 13px;
     font-weight: 300;
 }
+
+
