@@ -97,7 +97,7 @@ var proccessWeatherAPIResult = function(viewModel, apiresponse) {
 
   var apiResultBox = document.getElementById("weatherResults");
 
-  // clear previous results if any
+  // Clear previous results if any
   var child = apiResultBox.firstChild;
   while (child) {
     apiResultBox.removeChild(child);
@@ -230,22 +230,22 @@ var viewModel = function(initialLocation) {
     var map = self.map;
     // detect and handle only when enter key is pressed
     if (event.keyCode === 13) {
-      //go through each marker for all places
+      // Go through each marker for all places
       map.markers.forEach(function(marker) {
-        // if no place is selected in listbox and enter key is pressed
+        // If no place is selected in listbox and enter key is pressed
         if (self.selectedPlace() === '') {
-          //if a previous marker is already bouncing close it and its info
+          // If a previous marker is already bouncing close it and its info
           if (marker.getAnimation() !== null &&
             marker.getAnimation() == google.maps.Animation.BOUNCE) {
             marker.setAnimation(null);
             marker.infowindow.close();
           }
-          // display the marker in its stationary state for each place
+          // Display the marker in its stationary state for each place
           marker.setVisible(true);
 
-          // if selected listbox place is not equal to existing marker
+          // If selected listbox place is not equal to existing marker
         } else if (self.selectedPlace() != marker.title) {
-          // if existng marker is bouncing stop bounce and close info
+          // If existng marker is bouncing stop bounce and close info
           if (marker.getAnimation() !== null &&
             marker.getAnimation() == google.maps.Animation.BOUNCE) {
             marker.setAnimation(null);
@@ -253,7 +253,8 @@ var viewModel = function(initialLocation) {
           }
           // and set marker not visible
           marker.setVisible(false);
-          // if selected place matches with place of marker array, display marker and  click triggers togglebBounce  method
+          // If selected place matches with place of marker array,
+          // display marker and  click triggers togglebBounce  method
         } else {
           marker.setVisible(true);
           google.maps.event.trigger(marker, 'click');
@@ -263,7 +264,7 @@ var viewModel = function(initialLocation) {
 
 
     var results = document.getElementById("weatherResults").childNodes;
-    // detect and handle only when enter key is pressed
+    // Detect and handle only when enter key is pressed
     if (event.keyCode === 13) {
       var resLen = results.length;
       for (i = 0; i < resLen; i++) {

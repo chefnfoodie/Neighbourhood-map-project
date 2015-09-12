@@ -4,14 +4,14 @@ The objective of this project is to search for a location and with the help of G
 ####Part 1: On the initial rendering of the page
 * Open the index.html on a browser window.
 * The page loads with a search box initialized for the city Vancouver, BC, Canada, and the map is loaded.
-* The markers are loaded for the location Vancouver and the surrounding places based on the result from weather api . On hovering over a marker it displays an infowindow that gives the coordinates and current weather of that place. On clicking a marker it animates with a bounce and has to be clicked again to toggle back to its stable state.
+* The markers are loaded for the location Vancouver and the surrounding places based on the result from weather api . On clicking over a marker it bounces and displays an infowindow that gives the coordinates and current weather of that place. On clicking a marker it animates with a bounce and has to be clicked again to toggle back to its stable state.
 * A weather results box is displayed on the right side featuring a scrollable info of all the locations with respect to their coordinates and weather.
 
 ####Part 2: Instructions to run
 * Type a place or select a place in the search box. The map will zoom to the place. Hit the enter key to retrieve weather info. The markers will appear around the place and its nearby locations.
 * If typing a particular alphabet on the list view , the places suggested are as per the current neighborhood and on selecting the desired place and hitting enter key, marker corresponding to that place is shown bouncing and all other markers are rendered not visible. The appropriate coordinates and weather information of the selected place are displayed on the infowindow and the scrollable weather results box. The info of other places do not appear on the weather results box.
 * After applying filter, user can enter new location to display its info or enter blank/empty value to show all original markers and weather info.
-* If a place has already been selected from the list box and its marker is bouncing with its infowindow open, on clicking a new place from the list, the previous place marker and infowindow are rendered not visible.The new place marker is seen bouncing at its location with its corresponding infowindow open.
+* If a place has already been selected from the list box and its marker is bouncing with its infowindow open, on clicking a new place from the list, the previous place marker and infowindow are rendered not visible. The new place marker is seen bouncing at its location with its corresponding infowindow open.
 
 
 ####Part 3: Design
