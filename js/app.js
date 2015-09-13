@@ -29,7 +29,7 @@ function loadInitialMapData(viewModel) {
   });
 
 
-  // Listen for the event fired when the user selects a prediction and retrieve
+  // Listen for the event fired when the user selects a location and retrieve
   // more details for that place.
 
   searchBox.addListener('places_changed', function() {
@@ -62,7 +62,7 @@ function loadInitialMapData(viewModel) {
 
     });
     map.fitBounds(bounds);
-
+    callWeatherAPI(viewModel);
   });
 
   callWeatherAPI(viewModel);
@@ -125,14 +125,13 @@ var proccessWeatherAPIResult = function(viewModel, apiresponse) {
       var name = results.list[j].name;
       var isduplicate = false;
       // keep it simple - check for duplicate, skip if place is already there
-      for (var ii = 0; ii < nameArr.length; ii++)
-      {
-        if(nameArr[ii].valueOf() === name.valueOf()) {
+      for (var ii = 0; ii < nameArr.length; ii++) {
+        if (nameArr[ii].valueOf() === name.valueOf()) {
           isduplicate = true;
           continue;
         }
       }
-      if(isduplicate)
+      if (isduplicate)
         continue;
       nameArr[ctr] = name;
       ctr++;
@@ -180,56 +179,73 @@ var proccessWeatherAPIResult = function(viewModel, apiresponse) {
   // Uses jquery-ui library to autocomplete for suggestions
   $("#filterView").autocomplete({
     source: viewModel.placeList(),
-    close: function (event, ui) {
-      if(viewModel.selectedPlace() === "")
+    close: function(event, ui) {
+      if (viewModel.selectedPlace() === "")
         viewModel.filterResults("", event);
     },
 
-    select: function (event, ui) {
-      if(ui.item.value != null) {
+    select: function(event, ui) {
+      if (ui.item.value !== null) {
         viewModel.filterResults(ui.item.value, event);
-      }
-      else
+      } else
         viewModel.filterResults("", event);
     }
   });
   return viewModel.placeList;
 };
 
+var InfoWindow = (function() {
+  var instance;
+
+  function createInstance() {
+    var infowindow = new google.maps.InfoWindow({});
+    return infowindow;
+  }
+
+  return {
+    getInstance: function() {
+      if (!instance) {
+        instance = createInstance();
+      }
+      return instance;
+    }
+  };
+})();
 
 function toggleBounce() {
   var marker = this;
+  /*
   var infowindow = new google.maps.InfoWindow({
     content: marker.data
   });
+*/
+  var infowindow = InfoWindow.getInstance();
+  // iterate all markers, stop animation and close info window
+  //  if it is not current marker and if it is bouncing already
+  map.markers.forEach(function(currentmarker) {
+    if (currentmarker != marker) {
+      if (currentmarker.getAnimation() === google.maps.Animation.BOUNCE)
+        currentmarker.setAnimation(null);
+    }
+
+  });
+
+  infowindow.setContent(marker.data);
+  infowindow.close();
+
+
   if (marker.getAnimation() !== null && marker.getAnimation() === google.maps.Animation.BOUNCE) {
     marker.setAnimation(null);
+    marker.infowindow = infowindow;
     marker.infowindow.close();
+
   } else {
     marker.setAnimation(google.maps.Animation.BOUNCE);
-    infowindow.open(map, marker);
     marker.infowindow = infowindow;
-    marker.addListener('click', function() {
-      infowindow.close();
-    });
+    marker.infowindow.open(map, marker);
+    marker.infowindow = infowindow;
   }
 }
-
-
-// Function to animate marker with bounce
-
-var markerInfo = function(marker) {
-
-  var infowindow = new google.maps.InfoWindow({
-    content: marker.data,
-    maxWidth: 120
-  });
-  if (marker.getAnimation() !== null) {
-    infowindow.open(map, marker);
-  } else
-    infowindow.close();
-
-};
 
 
 // View model init
@@ -256,15 +272,14 @@ var viewModel = function(initialLocation) {
 
     // make sure this method is coming from Jquery select event,
     // if so, assign the selected place from dropdown to self.selectedPlace
-    if(!(data instanceof ko.observable)) {
+    if (!(data instanceof ko.observable)) {
       self.selectedPlace = ko.observable(data);
       sourcejquery = true;
     }
     // Markers array hide/show
     // Resultsbox - go thru child nodes of
 
-    var map = self.map;
-    {
+    var map = self.map; {
       // Go through each marker for all places
       map.markers.forEach(function(marker) {
         // If no place is selected in listbox and enter key is pressed
@@ -293,11 +308,9 @@ var viewModel = function(initialLocation) {
         } else {
           marker.setVisible(true);
           if (marker.getAnimation() !== null &&
-            marker.getAnimation() === google.maps.Animation.BOUNCE)
-          {
+            marker.getAnimation() === google.maps.Animation.BOUNCE) {
             // same place selected and it is already bouncing, do nothing
-          }
-          else
+          } else
             google.maps.event.trigger(marker, 'click');
         }
       });
