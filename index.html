@@ -22,7 +22,7 @@
 <body>
   <div id="topcontainer">
     <input id="pac-input" class="controls" type="text" placeholder="Select your location" data-bind="value: currentplace, event: {keypress: onSearch}, valueUpdate: 'afterkeydown'" />
-    <input id="filterView" class="controls" type="text" placeholder="Filter the results" data-bind="foreach: placeList, value: selectedPlace, event: {keyup: filterResults}, valueUpdate: 'keyup'" />
+    <input id="filterView" class="controls" type="text" placeholder="Filter the results" data-bind="foreach: placeList, value: selectedPlace,  valueUpdate: 'keyup'" />
   </div>
 
   <div id="map">

@@ -119,8 +119,25 @@ var proccessWeatherAPIResult = function(viewModel, apiresponse) {
   if (results.list !== null && results.list.length > 0) {
     var bounds = new google.maps.LatLngBounds();
     var len = results.list.length;
+    var nameArr = [];
+    var ctr = 0;
     for (var j = 0; j < len; j++) {
       var name = results.list[j].name;
+      var isduplicate = false;
+      // keep it simple - check for duplicate, skip if place is already there
+      for (var ii = 0; ii < nameArr.length; ii++)
+      {
+        if(nameArr[ii].valueOf() === name.valueOf()) {
+          isduplicate = true;
+          continue;
+        }
+      }
+      if(isduplicate)
+        continue;
+      nameArr[ctr] = name;
+      ctr++;
+
+
       // add to placeList
       viewModel.placeList.push(name);
       var lat = results.list[j].coord.lat;
@@ -162,7 +179,19 @@ var proccessWeatherAPIResult = function(viewModel, apiresponse) {
   }
   // Uses jquery-ui library to autocomplete for suggestions
   $("#filterView").autocomplete({
-    source: viewModel.placeList()
+    source: viewModel.placeList(),
+    close: function (event, ui) {
+      if(viewModel.selectedPlace() === "")
+        viewModel.filterResults("", event);
+    },
+
+    select: function (event, ui) {
+      if(ui.item.value != null) {
+        viewModel.filterResults(ui.item.value, event);
+      }
+      else
+        viewModel.filterResults("", event);
+    }
   });
   return viewModel.placeList;
 };
@@ -224,19 +253,25 @@ var viewModel = function(initialLocation) {
   };
 
   self.filterResults = function(data, event) {
+
+    // make sure this method is coming from Jquery select event,
+    // if so, assign the selected place from dropdown to self.selectedPlace
+    if(!(data instanceof ko.observable)) {
+      self.selectedPlace = ko.observable(data);
+      sourcejquery = true;
+    }
     // Markers array hide/show
     // Resultsbox - go thru child nodes of
 
     var map = self.map;
-    // detect and handle only when enter key is pressed
-    if (event.keyCode === 13) {
+    {
       // Go through each marker for all places
       map.markers.forEach(function(marker) {
         // If no place is selected in listbox and enter key is pressed
         if (self.selectedPlace() === '') {
           // If a previous marker is already bouncing close it and its info
           if (marker.getAnimation() !== null &&
-            marker.getAnimation() == google.maps.Animation.BOUNCE) {
+            marker.getAnimation() === google.maps.Animation.BOUNCE) {
             marker.setAnimation(null);
             marker.infowindow.close();
           }
@@ -247,7 +282,7 @@ var viewModel = function(initialLocation) {
         } else if (self.selectedPlace() != marker.title) {
           // If existng marker is bouncing stop bounce and close info
           if (marker.getAnimation() !== null &&
-            marker.getAnimation() == google.maps.Animation.BOUNCE) {
+            marker.getAnimation() === google.maps.Animation.BOUNCE) {
             marker.setAnimation(null);
             marker.infowindow.close();
           }
@@ -257,7 +292,13 @@ var viewModel = function(initialLocation) {
           // display marker and  click triggers togglebBounce  method
         } else {
           marker.setVisible(true);
-          google.maps.event.trigger(marker, 'click');
+          if (marker.getAnimation() !== null &&
+            marker.getAnimation() === google.maps.Animation.BOUNCE)
+          {
+            // same place selected and it is already bouncing, do nothing
+          }
+          else
+            google.maps.event.trigger(marker, 'click');
         }
       });
     }
@@ -265,7 +306,8 @@ var viewModel = function(initialLocation) {
 
     var results = document.getElementById("weatherResults").childNodes;
     // Detect and handle only when enter key is pressed
-    if (event.keyCode === 13) {
+    //if (event.keyCode === 13)
+    {
       var resLen = results.length;
       for (i = 0; i < resLen; i++) {
         placeInfo = results[i];
