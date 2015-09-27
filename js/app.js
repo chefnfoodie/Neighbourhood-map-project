@@ -57,6 +57,7 @@ function loadInitialMapData(viewModel) {
       } else {
         bounds.extend(place.geometry.location);
       }
+      // Update latitude/longitude so we can use from the place where weather API is called
       map.latitude = place.geometry.location.lat();
       map.longitude = place.geometry.location.lng();
 
@@ -65,6 +66,7 @@ function loadInitialMapData(viewModel) {
     callWeatherAPI(viewModel);
   });
 
+  // load weather data for initial location (Vancouver)
   callWeatherAPI(viewModel);
 }
 
@@ -95,14 +97,17 @@ function callWeatherAPI(viewModel) {
 // Function to process weather API result
 var proccessWeatherAPIResult = function(viewModel, apiresponse) {
 
-  var apiResultBox = document.getElementById("weatherResults");
 
-  // Clear previous results if any
-  var child = apiResultBox.firstChild;
-  while (child) {
-    apiResultBox.removeChild(child);
-    child = apiResultBox.firstChild;
-  }
+  /*
+    var apiResultBox = document.getElementById("weatherResults");
+
+    // Clear previous results if any
+    var child = apiResultBox.firstChild;
+    while (child) {
+      apiResultBox.removeChild(child);
+      child = apiResultBox.firstChild;
+    }
+    */
   var map = viewModel.map;
 
   map.markers.forEach(function(marker) {
@@ -110,9 +115,15 @@ var proccessWeatherAPIResult = function(viewModel, apiresponse) {
   });
   map.markers = [];
 
+
   viewModel.placeList.removeAll();
-  for (var i = 0; i < viewModel.placeList.length; i++) {
+  for (var i = 0; i < viewModel.placeList().length; i++) {
     viewModel.placeList.pop();
+  }
+
+  viewModel.listViewList.removeAll();
+  for (var i = 0; i < viewModel.listViewList().length; i++) {
+    viewModel.listViewList.pop();
   }
 
   var results = JSON.parse(apiresponse);
@@ -123,12 +134,13 @@ var proccessWeatherAPIResult = function(viewModel, apiresponse) {
     var ctr = 0;
     for (var j = 0; j < len; j++) {
       var name = results.list[j].name;
+
       var isduplicate = false;
       // keep it simple - check for duplicate, skip if place is already there
-      for (var ii = 0; ii < nameArr.length; ii++) {
-        if (nameArr[ii].valueOf() === name.valueOf()) {
+      for (var k = 0; k < nameArr.length; k++) {
+        if (nameArr[k].valueOf() === name.valueOf()) {
           isduplicate = true;
-          continue;
+          break;
         }
       }
       if (isduplicate)
@@ -139,20 +151,27 @@ var proccessWeatherAPIResult = function(viewModel, apiresponse) {
 
       // add to placeList
       viewModel.placeList.push(name);
+
       var lat = results.list[j].coord.lat;
       var lng = results.list[j].coord.lon;
       var temp = results.list[j].main.temp;
       var tempmax = results.list[j].main.temp_max;
       var tempmin = results.list[j].main.temp_min;
 
-      var textArea = document.createElement("Label");
-      var weatherBox = apiResultBox.appendChild(textArea);
-      textArea.setAttribute("title", name);
+      //var weatherBox = apiResultBox.appendChild(textArea);
 
-      var contentString = "<h2>Location: " + name + "</h2>" + "<p>Coordinates: " + lat + "(lat), " + lng + "(long) </p>" + "<p> Current Temperature (in celsius): " + temp + ", " + tempmax + " (max), " + tempmin + " (min) </p>";
+      var contentString = "<div> <h2>Location: " + name + "</h2>" + "<p>Coordinates: " + lat + "(lat), " + lng + "(long) </p>" + "<p> Current Temperature (in celsius): " + temp + ", " + tempmax + " (max), " + tempmin + " (min) </p></div>";
 
-      weatherBox.innerHTML = contentString;
-      weatherBox.className = "weatherBox";
+      var tempstr = "{\"name\": " + "\"" + name + "\"" + ", \"lat\": " + lat + ", \"lng\": " + lng + ", \"temp\": " + temp + ", \"tempmax\": " + tempmax + ", \"tempmin\": " + tempmin +
+        "}";
+      console.log(tempstr);
+      self.clickedplace = ko.observable(name);
+      var obj = JSON.parse(tempstr);
+
+      viewModel.listViewList.push(obj);
+
+      // weatherBox.innerHTML = contentString;
+      // weatherBox.className = "weatherBox";
 
       // Add markers to map
 
@@ -254,7 +273,10 @@ var viewModel = function(initialLocation) {
   var self = this;
   self.placeList = ko.observableArray();
   self.currentplace = ko.observable(initialLocation);
+  self.clickedplace = ko.observable();
   self.selectedPlace = ko.observable("");
+  self.listViewList = ko.observableArray();
+  self.listViewSelectedPlace = ko.observable("");
   self.map = initializeMap();
   self.map.markers = [];
   loadInitialMapData(self);
@@ -268,7 +290,14 @@ var viewModel = function(initialLocation) {
     return true;
   };
 
+  self.listViewListClick = function(data, event) {
+    self.filterResults(data.name, event);
+
+  };
+
   self.filterResults = function(data, event) {
+
+    var filterloc = data;
 
     // make sure this method is coming from Jquery select event,
     // if so, assign the selected place from dropdown to self.selectedPlace
@@ -276,9 +305,9 @@ var viewModel = function(initialLocation) {
       self.selectedPlace = ko.observable(data);
       sourcejquery = true;
     }
+
     // Markers array hide/show
     // Resultsbox - go thru child nodes of
-
     var map = self.map; {
       // Go through each marker for all places
       map.markers.forEach(function(marker) {
@@ -317,29 +346,10 @@ var viewModel = function(initialLocation) {
     }
 
 
-    var results = document.getElementById("weatherResults").childNodes;
-    // Detect and handle only when enter key is pressed
-    //if (event.keyCode === 13)
-    {
-      var resLen = results.length;
-      for (i = 0; i < resLen; i++) {
-        placeInfo = results[i];
-
-        title = placeInfo.getAttribute("title");
-        if (self.selectedPlace() === '') {
-          placeInfo.style.display = 'inline';
-        } else if (self.selectedPlace() != title) {
-          placeInfo.style.display = 'none';
-        } else {
-          placeInfo.style.display = 'inline';
-        }
-      }
-    }
     return true;
   };
   // End - Intialization
 };
-
 
 var initialPlace = "Vancouver, BC, CA";
 ko.applyBindings(new viewModel(initialPlace));
