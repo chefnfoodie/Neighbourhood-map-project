@@ -125,6 +125,7 @@ var proccessWeatherAPIResult = function(viewModel, apiresponse) {
   for (var i = 0; i < viewModel.listViewList().length; i++) {
     viewModel.listViewList.pop();
   }
+  $( "#weatherResults" ).draggable();
 
   var results = JSON.parse(apiresponse);
   if (results.list !== null && results.list.length > 0) {
@@ -160,7 +161,7 @@ var proccessWeatherAPIResult = function(viewModel, apiresponse) {
 
       //var weatherBox = apiResultBox.appendChild(textArea);
 
-      var contentString = "<div> <h2>Location: " + name + "</h2>" + "<p>Coordinates: " + lat + "(lat), " + lng + "(long) </p>" + "<p> Current Temperature (in celsius): " + temp + ", " + tempmax + " (max), " + tempmin + " (min) </p></div>";
+      var contentString = "<div id = 'content'> <h2>Location: " + name + "</h2>" + "<p>Coordinates: " + lat + "(lat), " + lng + "(long) </p>" + "<p> Current Temperature (in celsius): " + temp + ", " + tempmax + " (max), " + tempmin + " (min) </p></div>";
 
       var tempstr = "{\"name\": " + "\"" + name + "\"" + ", \"lat\": " + lat + ", \"lng\": " + lng + ", \"temp\": " + temp + ", \"tempmax\": " + tempmax + ", \"tempmin\": " + tempmin +
         "}";
@@ -193,8 +194,8 @@ var proccessWeatherAPIResult = function(viewModel, apiresponse) {
     }
     map.fitBounds(bounds);
 
-
   }
+
   // Uses jquery-ui library to autocomplete for suggestions
   $("#filterView").autocomplete({
     source: viewModel.placeList(),

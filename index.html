@@ -20,6 +20,7 @@
   </head>
 
   <body>
+    <div>
     <div id="topcontainer">
       <input id="pac-input" class="controls" type="text" placeholder="Select your location" data-bind="value: currentplace, event: {keypress: onSearch}, valueUpdate: 'afterkeydown'" />
       <input id="filterView" class="controls" type="text" placeholder="Filter the results" data-bind="foreach: placeList, value: selectedPlace,  valueUpdate: 'keyup'" />
@@ -28,7 +29,7 @@
     <div id="map">
     </div>
 
-    <div id="weatherResults">
+    <div id="weatherResults" >
       <div  data-bind="foreach: {data: listViewList, as: 'weatherdata'},  value: clickedplace, valueUpdate: 'keyup'">
         <div data-bind="click: $parent.listViewListClick", style="cursor:pointer">
         <h2 data-bind="text: 'Location: ' + weatherdata.name"></h2>
@@ -37,6 +38,7 @@
         </div>
       </div>
     </div>
+  </div>
 <!--
             : $data.name, click: $parent.listViewListClick", style="cursor:pointer">
 
