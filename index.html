@@ -8,19 +8,35 @@
     <title>
       Neighbourhood map project
     </title>
-    <script async src="js/lib/jquery.min.js">
+  <script async src="js/lib/jquery.min.js">
     </script>
-    <script src="https://maps.googleapis.com/maps/api/js?libraries=places">
-    </script>
+
+
     <script async src="js/lib/knockout-3.2.0.js">
     </script>
     <script async src="https://code.jquery.com/ui/1.11.4/jquery-ui.js">
     </script>
+
+
+    <script type="text/javascript" async defer src="https://maps.googleapis.com/maps/api/js?libraries=places&key=AIzaSyDiXj5JWEIMBww17IB1Z_6UrwQohiVAkCs&callback=initializeMap">
+    </script>
+
+
+<script async src="js/app.js">
+    </script>
+
+
+
+  </body>
+
+
     <link rel="stylesheet" async href="https://code.jquery.com/ui/1.11.4/themes/smoothness/jquery-ui.css">
+
   </head>
 
   <body>
     <div>
+
     <div id="topcontainer">
       <input id="pac-input" class="controls" type="text" placeholder="Select your location" data-bind="value: currentplace, event: {keypress: onSearch}, valueUpdate: 'afterkeydown'" />
       <input id="filterView" class="controls" type="text" placeholder="Filter the results" data-bind="foreach: placeList, value: selectedPlace,  valueUpdate: 'keyup'" />
@@ -32,24 +48,14 @@
     <div id="weatherResults" >
       <div  data-bind="foreach: {data: listViewList, as: 'weatherdata'},  value: clickedplace, valueUpdate: 'keyup'">
         <div data-bind="click: $parent.listViewListClick", style="cursor:pointer">
-        <h2 data-bind="text: 'Location: ' + weatherdata.name"></h2>
-        <p data-bind="text: 'Coordinates: ' + weatherdata.lat + ', (lat)' + weatherdata.lng + '(long)'">
-          <p data-bind="text: 'Current Temperature (in celsius): ' + weatherdata.temp + ', ' + weatherdata.tempmax + '(max)' + ', ' + weatherdata.tempmin + '(min)' ">
+        <h5 data-bind="text: weatherdata.name"></h2>
+        <!--p data-bind="text: 'Coordinates: ' + weatherdata.lat + ', (lat)' + weatherdata.lng + '(long)'">
+          <p data-bind="text: 'Current Temperature (in celsius): ' + weatherdata.temp + ', ' + weatherdata.tempmax + '(max)' + ', ' + weatherdata.tempmin + '(min)' "-->
         </div>
       </div>
     </div>
   </div>
-<!--
-            : $data.name, click: $parent.listViewListClick", style="cursor:pointer">
 
--->
-              <!--
-              <div> <h2>Location: " + name + "</h2>" + "<p>Coordinates: " + lat + "(lat), " + lng + "(long) </p>" + "<p> Current Temperature (in celsius): " + temp + ", " + tempmax + " (max), " + tempmin + " (min) </p></div>";
-            -->
 
-    <script async src="js/app.js">
-    </script>
-
-  </body>
 
 </html>

@@ -9,6 +9,7 @@ The objective of this project is to search for a location and with the help of G
 * Use list view box is displayed on the right side featuring a scrollable info of all the locations with respect to their coordinates and weather. On clicking a place, its appropriate marker alone bounces displaying its infowindow.
 
 ####Part 2: Instructions to run
+
 * Type a place or select a place in the search box. The map will zoom to the place and also retrieve weather info. The markers will appear around the place and its nearby locations.
 * If typing a particular alphabet on the filter view , the places suggested are as per the current neighborhood and on selecting the desired place , the  marker corresponding to that place is shown bouncing and all other markers are rendered not visible.
 * After applying filter, user can enter new location to display its info or enter blank/empty value to show all original markers and weather info.

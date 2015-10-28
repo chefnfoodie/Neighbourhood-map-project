@@ -10,7 +10,9 @@ function initializeMap() {
     longitude: -123.1239135
   });
 
-  return map;
+  viewModelObject.map = map;
+  viewModelObject.map.markers = [];
+  loadInitialMapData(viewModelObject);
 }
 
 // Load initial map, marker and weather data
@@ -34,12 +36,16 @@ function loadInitialMapData(viewModel) {
 
   searchBox.addListener('places_changed', function() {
     var places = searchBox.getPlaces();
+    console.log("---->>>> " + places.length);
 
     if (places.length === 0) {
       return;
     }
 
+    var myLatlng1 = {lat: map.latitude, lng: map.longitude};
+
     // For each place, get the icon, name and location.
+    // In this case there should be only one place
     var bounds = new google.maps.LatLngBounds();
     places.forEach(function(place) {
       var icon = {
@@ -47,7 +53,8 @@ function loadInitialMapData(viewModel) {
         size: new google.maps.Size(71, 71),
         origin: new google.maps.Point(0, 0),
         anchor: new google.maps.Point(17, 34),
-        scaledSize: new google.maps.Size(25, 25)
+        scaledSize: new google.maps.Size(25, 25),
+        center: myLatlng1
       };
 
 
@@ -57,9 +64,11 @@ function loadInitialMapData(viewModel) {
       } else {
         bounds.extend(place.geometry.location);
       }
+
       // Update latitude/longitude so we can use from the place where weather API is called
       map.latitude = place.geometry.location.lat();
       map.longitude = place.geometry.location.lng();
+
 
     });
     map.fitBounds(bounds);
@@ -82,8 +91,8 @@ function callWeatherAPI(viewModel) {
   $.ajax({
     url: requestString,
     dataType: 'text', // Choosing a text datatype
-    success: function(apiresponse) {
-      proccessWeatherAPIResult(viewModel, apiresponse);
+    success: function(apiResponse) {
+      proccessWeatherAPIResult(viewModel, apiResponse);
     },
     error: function(XMLHttpRequest, textStatus, errorThrown) {
       alert("Unable to load weather data now!");
@@ -95,27 +104,12 @@ function callWeatherAPI(viewModel) {
 
 
 // Function to process weather API result
-var proccessWeatherAPIResult = function(viewModel, apiresponse) {
-
-
-  /*
-    var apiResultBox = document.getElementById("weatherResults");
-
-    // Clear previous results if any
-    var child = apiResultBox.firstChild;
-    while (child) {
-      apiResultBox.removeChild(child);
-      child = apiResultBox.firstChild;
-    }
-    */
+var proccessWeatherAPIResult = function(viewModel, apiResponse) {
   var map = viewModel.map;
-
   map.markers.forEach(function(marker) {
     marker.setMap(null);
   });
   map.markers = [];
-
-
   viewModel.placeList.removeAll();
   for (var i = 0; i < viewModel.placeList().length; i++) {
     viewModel.placeList.pop();
@@ -127,7 +121,7 @@ var proccessWeatherAPIResult = function(viewModel, apiresponse) {
   }
   $( "#weatherResults" ).draggable();
 
-  var results = JSON.parse(apiresponse);
+  var results = JSON.parse(apiResponse);
   if (results.list !== null && results.list.length > 0) {
     var bounds = new google.maps.LatLngBounds();
     var len = results.list.length;
@@ -135,7 +129,6 @@ var proccessWeatherAPIResult = function(viewModel, apiresponse) {
     var ctr = 0;
     for (var j = 0; j < len; j++) {
       var name = results.list[j].name;
-
       var isduplicate = false;
       // keep it simple - check for duplicate, skip if place is already there
       for (var k = 0; k < nameArr.length; k++) {
@@ -148,8 +141,6 @@ var proccessWeatherAPIResult = function(viewModel, apiresponse) {
         continue;
       nameArr[ctr] = name;
       ctr++;
-
-
       // add to placeList
       viewModel.placeList.push(name);
 
@@ -158,9 +149,6 @@ var proccessWeatherAPIResult = function(viewModel, apiresponse) {
       var temp = results.list[j].main.temp;
       var tempmax = results.list[j].main.temp_max;
       var tempmin = results.list[j].main.temp_min;
-
-      //var weatherBox = apiResultBox.appendChild(textArea);
-
       var contentString = "<div id = 'content'> <h2>Location: " + name + "</h2>" + "<p>Coordinates: " + lat + "(lat), " + lng + "(long) </p>" + "<p> Current Temperature (in celsius): " + temp + ", " + tempmax + " (max), " + tempmin + " (min) </p></div>";
 
       var tempstr = "{\"name\": " + "\"" + name + "\"" + ", \"lat\": " + lat + ", \"lng\": " + lng + ", \"temp\": " + temp + ", \"tempmax\": " + tempmax + ", \"tempmin\": " + tempmin +
@@ -170,9 +158,6 @@ var proccessWeatherAPIResult = function(viewModel, apiresponse) {
       var obj = JSON.parse(tempstr);
 
       viewModel.listViewList.push(obj);
-
-      // weatherBox.innerHTML = contentString;
-      // weatherBox.className = "weatherBox";
 
       // Add markers to map
 
@@ -184,8 +169,6 @@ var proccessWeatherAPIResult = function(viewModel, apiresponse) {
         data: contentString,
         infowindow: null
       });
-
-
       marker.addListener('click', toggleBounce);
 
       // Create a marker for each place.
@@ -246,6 +229,7 @@ function toggleBounce() {
     if (currentmarker != marker) {
       if (currentmarker.getAnimation() === google.maps.Animation.BOUNCE)
         currentmarker.setAnimation(null);
+      map.setCenter(marker.getPosition());
     }
 
   });
@@ -278,9 +262,7 @@ var viewModel = function(initialLocation) {
   self.selectedPlace = ko.observable("");
   self.listViewList = ko.observableArray();
   self.listViewSelectedPlace = ko.observable("");
-  self.map = initializeMap();
-  self.map.markers = [];
-  loadInitialMapData(self);
+
 
   self.onSearch = function(data, event) {
     self.placeList.removeAll();
@@ -332,7 +314,7 @@ var viewModel = function(initialLocation) {
             marker.infowindow.close();
           }
           // and set marker not visible
-          marker.setVisible(false);
+          //marker.setVisible(false);
           // If selected place matches with place of marker array,
           // display marker and  click triggers togglebBounce  method
         } else {
@@ -353,4 +335,5 @@ var viewModel = function(initialLocation) {
 };
 
 var initialPlace = "Vancouver, BC, CA";
-ko.applyBindings(new viewModel(initialPlace));
+var viewModelObject = new viewModel(initialPlace);
+ko.applyBindings(viewModelObject);
