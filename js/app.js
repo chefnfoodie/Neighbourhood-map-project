@@ -13,6 +13,7 @@ function initializeMap() {
   viewModelObject.map = map;
   viewModelObject.map.markers = [];
   loadInitialMapData(viewModelObject);
+
 }
 
 // Load initial map, marker and weather data
@@ -36,13 +37,14 @@ function loadInitialMapData(viewModel) {
 
   searchBox.addListener('places_changed', function() {
     var places = searchBox.getPlaces();
-    console.log("---->>>> " + places.length);
-
     if (places.length === 0) {
       return;
     }
 
-    var myLatlng1 = {lat: map.latitude, lng: map.longitude};
+    var myLatlng1 = {
+      lat: map.latitude,
+      lng: map.longitude
+    };
 
     // For each place, get the icon, name and location.
     // In this case there should be only one place
@@ -77,6 +79,7 @@ function loadInitialMapData(viewModel) {
 
   // load weather data for initial location (Vancouver)
   callWeatherAPI(viewModel);
+
 }
 
 // Make Ajax call to OpenWeatherMap API, parse the results and display
@@ -105,6 +108,7 @@ function callWeatherAPI(viewModel) {
 
 // Function to process weather API result
 var proccessWeatherAPIResult = function(viewModel, apiResponse) {
+
   var map = viewModel.map;
   map.markers.forEach(function(marker) {
     marker.setMap(null);
@@ -119,7 +123,7 @@ var proccessWeatherAPIResult = function(viewModel, apiResponse) {
   for (var i = 0; i < viewModel.listViewList().length; i++) {
     viewModel.listViewList.pop();
   }
-  $( "#weatherResults" ).draggable();
+
 
   var results = JSON.parse(apiResponse);
   if (results.list !== null && results.list.length > 0) {
@@ -149,36 +153,60 @@ var proccessWeatherAPIResult = function(viewModel, apiResponse) {
       var temp = results.list[j].main.temp;
       var tempmax = results.list[j].main.temp_max;
       var tempmin = results.list[j].main.temp_min;
-      var contentString = "<div id = 'content'> <h2>Location: " + name + "</h2>" + "<p>Coordinates: " + lat + "(lat), " + lng + "(long) </p>" + "<p> Current Temperature (in celsius): " + temp + ", " + tempmax + " (max), " + tempmin + " (min) </p></div>";
+      var contentString = "<div id = 'content'> <h2>" + name + "</h2>" + "<p>Coordinates: " + lat + "(lat), " + lng + "(long) </p>" + "<p> Current Temperature (in celsius): " + temp + ", " + tempmax + " (max), " + tempmin + " (min) </p></div>";
 
       var tempstr = "{\"name\": " + "\"" + name + "\"" + ", \"lat\": " + lat + ", \"lng\": " + lng + ", \"temp\": " + temp + ", \"tempmax\": " + tempmax + ", \"tempmin\": " + tempmin +
         "}";
       console.log(tempstr);
       self.clickedplace = ko.observable(name);
       var obj = JSON.parse(tempstr);
-
       viewModel.listViewList.push(obj);
-
       // Add markers to map
-
+      
       var myLatLng = new google.maps.LatLng(lat, lng);
       var marker = new google.maps.Marker({
-        map: map,
-        title: name,
-        position: myLatLng,
-        data: contentString,
-        infowindow: null
-      });
-      marker.addListener('click', toggleBounce);
+    map: map,
+    title: name,
+    position: myLatLng,
+    data: contentString,
+    infowindow: null
+  });
+  marker.addListener('click', toggleBounce);
 
-      // Create a marker for each place.
-      map.markers.push(marker);
-      bounds.extend(myLatLng);
+  // Create a marker for each place.
+  map.markers.push(marker);
+  bounds.extend(myLatLng);
     }
-    map.fitBounds(bounds);
 
+    map.fitBounds(bounds);
   }
 
+    // Uses jquery-ui library to autocomplete for suggestions
+  processFilterView(viewModel);
+  return viewModel.placeList;
+};
+
+
+var addMarkers = function(latitude, longitude, contentString, bounds) {
+
+  // Add markers to map
+  var myLatLng = new google.maps.LatLng(latitude, longitude);
+  var marker = new google.maps.Marker({
+    map: map,
+    title: name,
+    position: myLatLng,
+    data: contentString,
+    infowindow: null
+  });
+  marker.addListener('click', toggleBounce);
+
+  // Create a marker for each place.
+  map.markers.push(marker);
+  bounds.extend(myLatLng);
+
+}
+
+var processFilterView = function(viewModel) {
   // Uses jquery-ui library to autocomplete for suggestions
   $("#filterView").autocomplete({
     source: viewModel.placeList(),
@@ -194,7 +222,6 @@ var proccessWeatherAPIResult = function(viewModel, apiResponse) {
         viewModel.filterResults("", event);
     }
   });
-  return viewModel.placeList;
 };
 
 var InfoWindow = (function() {
@@ -274,6 +301,7 @@ var viewModel = function(initialLocation) {
   };
 
   self.listViewListClick = function(data, event) {
+    console.log("listViewListClick......");
     self.filterResults(data.name, event);
 
   };
@@ -294,6 +322,7 @@ var viewModel = function(initialLocation) {
     var map = self.map; {
       // Go through each marker for all places
       map.markers.forEach(function(marker) {
+      
         // If no place is selected in listbox and enter key is pressed
         if (self.selectedPlace() === '') {
           // If a previous marker is already bouncing close it and its info
