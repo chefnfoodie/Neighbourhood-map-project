@@ -108,17 +108,22 @@ function callWeatherAPI(viewModel) {
 
 // Function to process weather API result
 var proccessWeatherAPIResult = function(viewModel, apiResponse) {
+  //Have to clear the existing places and markers w.r.t search box ,filterview and weatherbox before
+  //making fresh api calls and displaying the relavent markers
 
+  // clear the existing markers of location search
   var map = viewModel.map;
   map.markers.forEach(function(marker) {
     marker.setMap(null);
   });
   map.markers = [];
+
+  //clear the existing filterview places array
   viewModel.placeList.removeAll();
   for (var i = 0; i < viewModel.placeList().length; i++) {
     viewModel.placeList.pop();
   }
-
+  //clear the existing weatherbox places array
   viewModel.listViewList.removeAll();
   for (var i = 0; i < viewModel.listViewList().length; i++) {
     viewModel.listViewList.pop();
@@ -162,19 +167,28 @@ var proccessWeatherAPIResult = function(viewModel, apiResponse) {
       var obj = JSON.parse(tempstr);
       viewModel.listViewList.push(obj);
       // Add markers to map
-      
+
       var myLatLng = new google.maps.LatLng(lat, lng);
-      var marker = new google.maps.Marker({
-    map: map,
-    title: name,
-    position: myLatLng,
-    data: contentString,
-    infowindow: null
-  });
-  marker.addListener('click', toggleBounce);
+
+
+        var marker = new google.maps.Marker({
+
+          map: map,
+          title: name,
+          position: myLatLng,
+          data: contentString,
+          infowindow: null,
+
+
+        });
+
+
+      marker.addListener('click', toggleBounce);
 
   // Create a marker for each place.
+
   map.markers.push(marker);
+
   bounds.extend(myLatLng);
     }
 
@@ -183,25 +197,39 @@ var proccessWeatherAPIResult = function(viewModel, apiResponse) {
 
     // Uses jquery-ui library to autocomplete for suggestions
   processFilterView(viewModel);
+  //addMarkers(latitude, longitude, contentString, bounds, 4000)
+
   return viewModel.placeList;
 };
 
 
-var addMarkers = function(latitude, longitude, contentString, bounds) {
+var addMarkers = function(latitude, longitude, contentString, bounds, timeout) {
+
+
+
 
   // Add markers to map
   var myLatLng = new google.maps.LatLng(latitude, longitude);
+
   var marker = new google.maps.Marker({
     map: map,
     title: name,
     position: myLatLng,
     data: contentString,
-    infowindow: null
+    infowindow: null,
   });
+
+
+
+
   marker.addListener('click', toggleBounce);
 
   // Create a marker for each place.
+  window.setTimeout(function() {
+
   map.markers.push(marker);
+}, 3000);
+
   bounds.extend(myLatLng);
 
 }
@@ -224,6 +252,7 @@ var processFilterView = function(viewModel) {
   });
 };
 
+//infowindow function that displays coordinates and current temperature
 var InfoWindow = (function() {
   var instance;
 
@@ -242,41 +271,41 @@ var InfoWindow = (function() {
   };
 })();
 
+
 function toggleBounce() {
   var marker = this;
-  /*
-  var infowindow = new google.maps.InfoWindow({
-    content: marker.data
-  });
-*/
   var infowindow = InfoWindow.getInstance();
   // iterate all markers, stop animation and close info window
   //  if it is not current marker and if it is bouncing already
-  map.markers.forEach(function(currentmarker) {
-    if (currentmarker != marker) {
-      if (currentmarker.getAnimation() === google.maps.Animation.BOUNCE)
-        currentmarker.setAnimation(null);
-      map.setCenter(marker.getPosition());
+
+    map.markers.forEach(function(currentmarker) {
+      if (currentmarker != marker) {
+        if (currentmarker.getAnimation() === google.maps.Animation.BOUNCE)
+          currentmarker.setAnimation(null);
+        map.setCenter(marker.getPosition());
+      }
+
+
+    });
+    infowindow.setContent(marker.data);
+    infowindow.close();
+    if (marker.getAnimation() !== null && marker.getAnimation() === google.maps.Animation.BOUNCE)
+    {
+      marker.setAnimation(null);
+      marker.infowindow = infowindow;
+      marker.infowindow.close();
     }
-
-  });
-
-  infowindow.setContent(marker.data);
-  infowindow.close();
-
-
-  if (marker.getAnimation() !== null && marker.getAnimation() === google.maps.Animation.BOUNCE) {
-    marker.setAnimation(null);
-    marker.infowindow = infowindow;
-    marker.infowindow.close();
-
-  } else {
-    marker.setAnimation(google.maps.Animation.BOUNCE);
-    marker.infowindow = infowindow;
-    marker.infowindow.open(map, marker);
-    marker.infowindow = infowindow;
+    else {
+      window.setTimeout(function() {
+        console.log("setTimeout....");
+        marker.setAnimation(null);
+      }, 5000);
+      marker.setAnimation(google.maps.Animation.BOUNCE);
+      marker.infowindow = infowindow;
+      marker.infowindow.open(map, marker);
+      marker.infowindow = infowindow;
+    }
   }
-}
 
 
 // View model init
@@ -322,7 +351,7 @@ var viewModel = function(initialLocation) {
     var map = self.map; {
       // Go through each marker for all places
       map.markers.forEach(function(marker) {
-      
+
         // If no place is selected in listbox and enter key is pressed
         if (self.selectedPlace() === '') {
           // If a previous marker is already bouncing close it and its info
