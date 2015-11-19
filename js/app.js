@@ -22,7 +22,8 @@ function loadInitialMapData(viewModel) {
   var map = viewModel.map;
   // Create the search box and link it to the UI element.
   var input = document.getElementById('pac-input');
-
+  searchPlace = input.value;
+  console.log(" ----" + searchPlace);
   var searchBox = new google.maps.places.SearchBox(input);
   // map.controls[google.maps.ControlPosition.TOP_LEFT].push(input);
 
@@ -37,6 +38,7 @@ function loadInitialMapData(viewModel) {
 
   searchBox.addListener('places_changed', function() {
     var places = searchBox.getPlaces();
+
     if (places.length === 0) {
       return;
     }
@@ -125,23 +127,24 @@ var proccessWeatherAPIResult = function(viewModel, apiResponse) {
   }
   //clear the existing weatherbox places array
   viewModel.listViewList.removeAll();
-  for (var i = 0; i < viewModel.listViewList().length; i++) {
+  for (var j = 0; j < viewModel.listViewList().length; j++) {
     viewModel.listViewList.pop();
   }
 
 
   var results = JSON.parse(apiResponse);
+  var searchPlaceTemp;
   if (results.list !== null && results.list.length > 0) {
     var bounds = new google.maps.LatLngBounds();
     var len = results.list.length;
     var nameArr = [];
     var ctr = 0;
-    for (var j = 0; j < len; j++) {
-      var name = results.list[j].name;
+    for (var k = 0; k < len; k++) {
+      var name = results.list[k].name;
       var isduplicate = false;
       // keep it simple - check for duplicate, skip if place is already there
-      for (var k = 0; k < nameArr.length; k++) {
-        if (nameArr[k].valueOf() === name.valueOf()) {
+      for (var l = 0; l < nameArr.length; l++) {
+        if (nameArr[l].valueOf() === name.valueOf()) {
           isduplicate = true;
           break;
         }
@@ -152,12 +155,14 @@ var proccessWeatherAPIResult = function(viewModel, apiResponse) {
       ctr++;
       // add to placeList
       viewModel.placeList.push(name);
+      console.log(results.list[j]);
 
-      var lat = results.list[j].coord.lat;
-      var lng = results.list[j].coord.lon;
-      var temp = results.list[j].main.temp;
-      var tempmax = results.list[j].main.temp_max;
-      var tempmin = results.list[j].main.temp_min;
+      var lat = results.list[k].coord.lat;
+      var lng = results.list[k].coord.lon;
+      var temp = results.list[k].main.temp;
+      var tempmax = results.list[k].main.temp_max;
+      var tempmin = results.list[k].main.temp_min;
+
       var contentString = "<div id = 'content'> <h2>" + name + "</h2>" + "<p>Coordinates: " + lat + "(lat), " + lng + "(long) </p>" + "<p> Current Temperature (in celsius): " + temp + ", " + tempmax + " (max), " + tempmin + " (min) </p></div>";
 
       var tempstr = "{\"name\": " + "\"" + name + "\"" + ", \"lat\": " + lat + ", \"lng\": " + lng + ", \"temp\": " + temp + ", \"tempmax\": " + tempmax + ", \"tempmin\": " + tempmin +
@@ -166,49 +171,61 @@ var proccessWeatherAPIResult = function(viewModel, apiResponse) {
       self.clickedplace = ko.observable(name);
       var obj = JSON.parse(tempstr);
       viewModel.listViewList.push(obj);
-      // Add markers to map
 
+      // Add markers to map
       var myLatLng = new google.maps.LatLng(lat, lng);
 
-
-        var marker = new google.maps.Marker({
-
+       var marker = new google.maps.Marker({
           map: map,
           title: name,
           position: myLatLng,
           data: contentString,
           infowindow: null,
-
-
+          temperature: temp
         });
 
-
       marker.addListener('click', toggleBounce);
-
-  // Create a marker for each place.
-
-  map.markers.push(marker);
-
-  bounds.extend(myLatLng);
+      map.markers.push(marker);
+      if (searchPlace.indexOf(name) > -1) {
+        searchPlaceTemp = temp;
+        marker.setIcon('http://maps.google.com/mapfiles/ms/icons/green-dot.png');
+      }
+      // Create a marker for each place.
+      bounds.extend(myLatLng);
     }
 
+    // Go through added markers array and set the icons
+    map.markers.forEach(function(currentmarker) {
+      console.log("marker -- " + currentmarker.title + ", " + currentmarker.temperature);
+      if (currentmarker.temperature == searchPlaceTemp)
+      currentmarker.setIcon('http://maps.google.com/mapfiles/ms/icons/green-dot.png');
+    else
+      if(currentmarker.temperature > searchPlaceTemp)
+        currentmarker.setIcon('http://maps.google.com/mapfiles/ms/icons/red-dot.png');
+      else
+        currentmarker.setIcon('http://maps.google.com/mapfiles/ms/icons/blue-dot.png');
+    });
+
     map.fitBounds(bounds);
+    return viewModel.placeList;
   }
 
-    // Uses jquery-ui library to autocomplete for suggestions
-  processFilterView(viewModel);
-  //addMarkers(latitude, longitude, contentString, bounds, 4000)
 
-  return viewModel.placeList;
+
+
+  // Uses jquery-ui library to autocomplete for suggestions
+  processFilterView(viewModel);
+  //addMarkersColor(latitude, longitude, contentString, bounds, 4000)
+
+
 };
 
 
-var addMarkers = function(latitude, longitude, contentString, bounds, timeout) {
-
-
-
-
+var addMarkersColor = function(latitude, longitude, contentString, bounds, timeout) {
   // Add markers to map
+
+
+
   var myLatLng = new google.maps.LatLng(latitude, longitude);
 
   var marker = new google.maps.Marker({
@@ -227,8 +244,8 @@ var addMarkers = function(latitude, longitude, contentString, bounds, timeout) {
   // Create a marker for each place.
   window.setTimeout(function() {
 
-  map.markers.push(marker);
-}, 3000);
+    map.markers.push(marker);
+  }, 3000);
 
   bounds.extend(myLatLng);
 
@@ -278,34 +295,32 @@ function toggleBounce() {
   // iterate all markers, stop animation and close info window
   //  if it is not current marker and if it is bouncing already
 
-    map.markers.forEach(function(currentmarker) {
-      if (currentmarker != marker) {
-        if (currentmarker.getAnimation() === google.maps.Animation.BOUNCE)
-          currentmarker.setAnimation(null);
-        map.setCenter(marker.getPosition());
-      }
+  map.markers.forEach(function(currentmarker) {
+    if (currentmarker != marker) {
+      if (currentmarker.getAnimation() === google.maps.Animation.BOUNCE)
+        currentmarker.setAnimation(null);
+      map.setCenter(marker.getPosition());
+    }
 
 
-    });
-    infowindow.setContent(marker.data);
-    infowindow.close();
-    if (marker.getAnimation() !== null && marker.getAnimation() === google.maps.Animation.BOUNCE)
-    {
+  });
+  infowindow.setContent(marker.data);
+  infowindow.close();
+  if (marker.getAnimation() !== null && marker.getAnimation() === google.maps.Animation.BOUNCE) {
+    marker.setAnimation(null);
+    marker.infowindow = infowindow;
+    marker.infowindow.close();
+  } else {
+    window.setTimeout(function() {
+      console.log("setTimeout....");
       marker.setAnimation(null);
-      marker.infowindow = infowindow;
-      marker.infowindow.close();
-    }
-    else {
-      window.setTimeout(function() {
-        console.log("setTimeout....");
-        marker.setAnimation(null);
-      }, 5000);
-      marker.setAnimation(google.maps.Animation.BOUNCE);
-      marker.infowindow = infowindow;
-      marker.infowindow.open(map, marker);
-      marker.infowindow = infowindow;
-    }
+    }, 5000);
+    marker.setAnimation(google.maps.Animation.BOUNCE);
+    marker.infowindow = infowindow;
+    marker.infowindow.open(map, marker);
+    marker.infowindow = infowindow;
   }
+}
 
 
 // View model init
@@ -314,6 +329,7 @@ var viewModel = function(initialLocation) {
   var self = this;
   self.placeList = ko.observableArray();
   self.currentplace = ko.observable(initialLocation);
+  console.log("...." + self.currentplace.value);
   self.clickedplace = ko.observable();
   self.selectedPlace = ko.observable("");
   self.listViewList = ko.observableArray();
