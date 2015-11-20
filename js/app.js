@@ -23,7 +23,7 @@ function loadInitialMapData(viewModel) {
   // Create the search box and link it to the UI element.
   var input = document.getElementById('pac-input');
   searchPlace = input.value;
-  console.log(" ----" + searchPlace);
+
   var searchBox = new google.maps.places.SearchBox(input);
   // map.controls[google.maps.ControlPosition.TOP_LEFT].push(input);
 
@@ -133,7 +133,6 @@ var proccessWeatherAPIResult = function(viewModel, apiResponse) {
 
 
   var results = JSON.parse(apiResponse);
-  var searchPlaceTemp;
   if (results.list !== null && results.list.length > 0) {
     var bounds = new google.maps.LatLngBounds();
     var len = results.list.length;
@@ -155,7 +154,7 @@ var proccessWeatherAPIResult = function(viewModel, apiResponse) {
       ctr++;
       // add to placeList
       viewModel.placeList.push(name);
-      console.log(results.list[j]);
+
 
       var lat = results.list[k].coord.lat;
       var lng = results.list[k].coord.lon;
@@ -165,91 +164,71 @@ var proccessWeatherAPIResult = function(viewModel, apiResponse) {
 
       var contentString = "<div id = 'content'> <h2>" + name + "</h2>" + "<p>Coordinates: " + lat + "(lat), " + lng + "(long) </p>" + "<p> Current Temperature (in celsius): " + temp + ", " + tempmax + " (max), " + tempmin + " (min) </p></div>";
 
-      var tempstr = "{\"name\": " + "\"" + name + "\"" + ", \"lat\": " + lat + ", \"lng\": " + lng + ", \"temp\": " + temp + ", \"tempmax\": " + tempmax + ", \"tempmin\": " + tempmin +
-        "}";
-      console.log(tempstr);
+      var tempstr = "{\"name\": " + "\"" + name + "\"" + ", \"lat\": " + lat + ", \"lng\": " + lng + ", \"temp\": " + temp + ", \"tempmax\": " + tempmax + ", \"tempmin\": " + tempmin + "}";
+
       self.clickedplace = ko.observable(name);
       var obj = JSON.parse(tempstr);
       viewModel.listViewList.push(obj);
 
+      var helperData = {latitude: lat, longitude: lng, title: name, data: contentString,
+        bounds: bounds, temperature: temp
+      };
       // Add markers to map
-      var myLatLng = new google.maps.LatLng(lat, lng);
-
-       var marker = new google.maps.Marker({
-          map: map,
-          title: name,
-          position: myLatLng,
-          data: contentString,
-          infowindow: null,
-          temperature: temp
-        });
-
-      marker.addListener('click', toggleBounce);
-      map.markers.push(marker);
-      if (searchPlace.indexOf(name) > -1) {
-        searchPlaceTemp = temp;
-        marker.setIcon('http://maps.google.com/mapfiles/ms/icons/green-dot.png');
-      }
-      // Create a marker for each place.
-      bounds.extend(myLatLng);
+      addMarker(map, helperData);
     }
 
-    // Go through added markers array and set the icons
-    map.markers.forEach(function(currentmarker) {
-      console.log("marker -- " + currentmarker.title + ", " + currentmarker.temperature);
-      if (currentmarker.temperature == searchPlaceTemp)
-      currentmarker.setIcon('http://maps.google.com/mapfiles/ms/icons/green-dot.png');
-    else
-      if(currentmarker.temperature > searchPlaceTemp)
-        currentmarker.setIcon('http://maps.google.com/mapfiles/ms/icons/red-dot.png');
-      else
-        currentmarker.setIcon('http://maps.google.com/mapfiles/ms/icons/blue-dot.png');
-    });
+    resetMarkerColors(map);
 
     map.fitBounds(bounds);
-    return viewModel.placeList;
   }
-
-
-
 
   // Uses jquery-ui library to autocomplete for suggestions
   processFilterView(viewModel);
-  //addMarkersColor(latitude, longitude, contentString, bounds, 4000)
-
 
 };
 
+// Go through added markers array and set the icons as per the temperature
+var resetMarkerColors = function(currentmap) {
 
-var addMarkersColor = function(latitude, longitude, contentString, bounds, timeout) {
-  // Add markers to map
+  currentmap.markers.forEach(function(currentmarker) {
 
+    if (currentmarker.temperature == searchPlaceTemp)
+      currentmarker.setIcon('http://maps.google.com/mapfiles/ms/icons/green-dot.png');
+    else if(currentmarker.temperature > searchPlaceTemp)
+      currentmarker.setIcon('http://maps.google.com/mapfiles/ms/icons/red-dot.png');
+    else
+      currentmarker.setIcon('http://maps.google.com/mapfiles/ms/icons/blue-dot.png');
+  });
+};
 
-
-  var myLatLng = new google.maps.LatLng(latitude, longitude);
+// Add markers to map
+var addMarker = function(currentmap, helperData) {
+  var myLatLng = new google.maps.LatLng(helperData.latitude, helperData.longitude);
 
   var marker = new google.maps.Marker({
-    map: map,
-    title: name,
+    map: currentmap,
+    title: helperData.title,
     position: myLatLng,
-    data: contentString,
+    data: helperData.data,
     infowindow: null,
+    temperature: helperData.temperature
   });
-
-
 
 
   marker.addListener('click', toggleBounce);
 
   // Create a marker for each place.
-  window.setTimeout(function() {
+  currentmap.markers.push(marker);
 
-    map.markers.push(marker);
-  }, 3000);
 
-  bounds.extend(myLatLng);
+  if (searchPlace.indexOf(helperData.title) > -1) {
+        searchPlaceTemp = helperData.temperature;
+        marker.setIcon('http://maps.google.com/mapfiles/ms/icons/green-dot.png');
+  }
 
-}
+  helperData.bounds.extend(myLatLng);
+
+};
 
 var processFilterView = function(viewModel) {
   // Uses jquery-ui library to autocomplete for suggestions
@@ -301,9 +280,8 @@ function toggleBounce() {
         currentmarker.setAnimation(null);
       map.setCenter(marker.getPosition());
     }
-
-
   });
+
   infowindow.setContent(marker.data);
   infowindow.close();
   if (marker.getAnimation() !== null && marker.getAnimation() === google.maps.Animation.BOUNCE) {
@@ -311,8 +289,8 @@ function toggleBounce() {
     marker.infowindow = infowindow;
     marker.infowindow.close();
   } else {
+    // marker stops after 5 secs
     window.setTimeout(function() {
-      console.log("setTimeout....");
       marker.setAnimation(null);
     }, 5000);
     marker.setAnimation(google.maps.Animation.BOUNCE);
@@ -329,7 +307,7 @@ var viewModel = function(initialLocation) {
   var self = this;
   self.placeList = ko.observableArray();
   self.currentplace = ko.observable(initialLocation);
-  console.log("...." + self.currentplace.value);
+
   self.clickedplace = ko.observable();
   self.selectedPlace = ko.observable("");
   self.listViewList = ko.observableArray();
@@ -346,7 +324,7 @@ var viewModel = function(initialLocation) {
   };
 
   self.listViewListClick = function(data, event) {
-    console.log("listViewListClick......");
+
     self.filterResults(data.name, event);
 
   };

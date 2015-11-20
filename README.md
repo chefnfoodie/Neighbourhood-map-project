@@ -4,9 +4,9 @@ The objective of this project is to search for a location and with the help of G
 ####Part 1: On the initial rendering of the page
 * Open the index.html on a browser window.
 * The page loads with a search box initialized for the city Vancouver, BC, Canada, and the map is loaded.
-* The markers are loaded for the location Vancouver and the surrounding places based on the result from weather api . On clicking over a marker it bounces and displays an infowindow that gives the coordinates and current weather of that place. On clicking a marker it animates with a bounce and has to be clicked again to toggle back to its stable state.
+* The markers are loaded for the location Vancouver and the surrounding places based on the result from weather api . The green marker corresponds to the search place, the blue markers to place colder than the searchplace and the red ones to the warmer places.On clicking over a marker it bounces and displays an infowindow that gives the coordinates and current weather of that place. On clicking a marker it animates with a bounce and stops bouncing after 5 seconds.
 * Use 'quick filter' as an alternate to list view, wherein on selecting the place, its appropriate bouncing marker is displayed along with its infowindow.
-* Use list view box is displayed on the right side featuring a scrollable info of all the locations with respect to their coordinates and weather. On clicking a place, its appropriate marker alone bounces displaying its infowindow.
+* Use list view box is displayed on the right side featuring a scrollable list of all the locations. On clicking a place, its appropriate marker alone bounces displaying its infowindow.
 
 ####Part 2: Instructions to run
 
@@ -15,7 +15,7 @@ The objective of this project is to search for a location and with the help of G
 * After applying filter, user can enter new location to display its info or enter blank/empty value to show all original markers and weather info.
 * If a place has already been selected from the list box and its marker is bouncing with its infowindow open, on clicking a new place from the list, the previous place marker and infowindow are rendered not visible. The new place marker is seen bouncing at its location with its corresponding infowindow open.
 * If a place is clicked in the scrollable list view, its appropriate marker alone bounces displaying its infowindow.
-*The list view box is draggable and scrollable on desktop browsers.
+
 
 
 ####Part 3: Design
