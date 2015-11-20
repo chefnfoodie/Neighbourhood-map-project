@@ -9,11 +9,9 @@ function initializeMap() {
     latitude: 49.2569332,
     longitude: -123.1239135
   });
-
   viewModelObject.map = map;
   viewModelObject.map.markers = [];
   loadInitialMapData(viewModelObject);
-
 }
 
 // Load initial map, marker and weather data
@@ -32,22 +30,17 @@ function loadInitialMapData(viewModel) {
     searchBox.setBounds(map.getBounds());
   });
 
-
   // Listen for the event fired when the user selects a location and retrieve
   // more details for that place.
-
   searchBox.addListener('places_changed', function() {
     var places = searchBox.getPlaces();
-
     if (places.length === 0) {
       return;
     }
-
     var myLatlng1 = {
       lat: map.latitude,
       lng: map.longitude
     };
-
     // For each place, get the icon, name and location.
     // In this case there should be only one place
     var bounds = new google.maps.LatLngBounds();
@@ -60,39 +53,31 @@ function loadInitialMapData(viewModel) {
         scaledSize: new google.maps.Size(25, 25),
         center: myLatlng1
       };
-
-
       if (place.geometry.viewport) {
         // Only geocodes have viewport.
         bounds.union(place.geometry.viewport);
       } else {
         bounds.extend(place.geometry.location);
       }
-
       // Update latitude/longitude so we can use from the place where weather API is called
       map.latitude = place.geometry.location.lat();
       map.longitude = place.geometry.location.lng();
-
-
     });
     map.fitBounds(bounds);
     callWeatherAPI(viewModel);
   });
-
   // load weather data for initial location (Vancouver)
   callWeatherAPI(viewModel);
-
 }
 
 // Make Ajax call to OpenWeatherMap API, parse the results and display
 // the markers on map along with weather info on the side box
 function callWeatherAPI(viewModel) {
-  var map = viewModel.map;
 
+  var map = viewModel.map;
   var openWeatherAPIKey = "32185e21f26ced31524446c346285787";
   // Get weather from OpenWeatherMap for this location and around this location
   var requestString = "http://api.openweathermap.org/data/2.5/find?units=metric&lat=" + map.latitude + "&lon=" + map.longitude + "&APPID=" + openWeatherAPIKey + "&cnt=15";
-
   $.ajax({
     url: requestString,
     dataType: 'text', // Choosing a text datatype
@@ -105,21 +90,18 @@ function callWeatherAPI(viewModel) {
   });
 }
 
-
-
-
 // Function to process weather API result
+
 var proccessWeatherAPIResult = function(viewModel, apiResponse) {
   //Have to clear the existing places and markers w.r.t search box ,filterview and weatherbox before
   //making fresh api calls and displaying the relavent markers
-
   // clear the existing markers of location search
+
   var map = viewModel.map;
   map.markers.forEach(function(marker) {
     marker.setMap(null);
   });
   map.markers = [];
-
   //clear the existing filterview places array
   viewModel.placeList.removeAll();
   for (var i = 0; i < viewModel.placeList().length; i++) {
@@ -130,8 +112,6 @@ var proccessWeatherAPIResult = function(viewModel, apiResponse) {
   for (var j = 0; j < viewModel.listViewList().length; j++) {
     viewModel.listViewList.pop();
   }
-
-
   var results = JSON.parse(apiResponse);
   if (results.list !== null && results.list.length > 0) {
     var bounds = new google.maps.LatLngBounds();
@@ -154,8 +134,6 @@ var proccessWeatherAPIResult = function(viewModel, apiResponse) {
       ctr++;
       // add to placeList
       viewModel.placeList.push(name);
-
-
       var lat = results.list[k].coord.lat;
       var lng = results.list[k].coord.lon;
       var temp = results.list[k].main.temp;
@@ -170,31 +148,31 @@ var proccessWeatherAPIResult = function(viewModel, apiResponse) {
       var obj = JSON.parse(tempstr);
       viewModel.listViewList.push(obj);
 
-      var helperData = {latitude: lat, longitude: lng, title: name, data: contentString,
-        bounds: bounds, temperature: temp
+      var helperData = {
+        latitude: lat,
+        longitude: lng,
+        title: name,
+        data: contentString,
+        bounds: bounds,
+        temperature: temp
       };
       // Add markers to map
       addMarker(map, helperData);
     }
-
     resetMarkerColors(map);
-
     map.fitBounds(bounds);
   }
-
   // Uses jquery-ui library to autocomplete for suggestions
   processFilterView(viewModel);
-
 };
 
 // Go through added markers array and set the icons as per the temperature
 var resetMarkerColors = function(currentmap) {
 
   currentmap.markers.forEach(function(currentmarker) {
-
     if (currentmarker.temperature == searchPlaceTemp)
       currentmarker.setIcon('http://maps.google.com/mapfiles/ms/icons/green-dot.png');
-    else if(currentmarker.temperature > searchPlaceTemp)
+    else if (currentmarker.temperature > searchPlaceTemp)
       currentmarker.setIcon('http://maps.google.com/mapfiles/ms/icons/red-dot.png');
     else
       currentmarker.setIcon('http://maps.google.com/mapfiles/ms/icons/blue-dot.png');
@@ -203,6 +181,7 @@ var resetMarkerColors = function(currentmap) {
 
 // Add markers to map
 var addMarker = function(currentmap, helperData) {
+
   var myLatLng = new google.maps.LatLng(helperData.latitude, helperData.longitude);
 
   var marker = new google.maps.Marker({
@@ -213,21 +192,15 @@ var addMarker = function(currentmap, helperData) {
     infowindow: null,
     temperature: helperData.temperature
   });
-
-
   marker.addListener('click', toggleBounce);
-
   // Create a marker for each place.
   currentmap.markers.push(marker);
 
-
   if (searchPlace.indexOf(helperData.title) > -1) {
-        searchPlaceTemp = helperData.temperature;
-        marker.setIcon('http://maps.google.com/mapfiles/ms/icons/green-dot.png');
+    searchPlaceTemp = helperData.temperature;
+    marker.setIcon('http://maps.google.com/mapfiles/ms/icons/green-dot.png');
   }
-
   helperData.bounds.extend(myLatLng);
-
 };
 
 var processFilterView = function(viewModel) {
@@ -238,7 +211,6 @@ var processFilterView = function(viewModel) {
       if (viewModel.selectedPlace() === "")
         viewModel.filterResults("", event);
     },
-
     select: function(event, ui) {
       if (ui.item.value !== null) {
         viewModel.filterResults(ui.item.value, event);
@@ -256,7 +228,6 @@ var InfoWindow = (function() {
     var infowindow = new google.maps.InfoWindow({});
     return infowindow;
   }
-
   return {
     getInstance: function() {
       if (!instance) {
@@ -273,7 +244,6 @@ function toggleBounce() {
   var infowindow = InfoWindow.getInstance();
   // iterate all markers, stop animation and close info window
   //  if it is not current marker and if it is bouncing already
-
   map.markers.forEach(function(currentmarker) {
     if (currentmarker != marker) {
       if (currentmarker.getAnimation() === google.maps.Animation.BOUNCE)
@@ -281,7 +251,6 @@ function toggleBounce() {
       map.setCenter(marker.getPosition());
     }
   });
-
   infowindow.setContent(marker.data);
   infowindow.close();
   if (marker.getAnimation() !== null && marker.getAnimation() === google.maps.Animation.BOUNCE) {
@@ -300,20 +269,16 @@ function toggleBounce() {
   }
 }
 
-
 // View model init
 var viewModel = function(initialLocation) {
 
   var self = this;
   self.placeList = ko.observableArray();
   self.currentplace = ko.observable(initialLocation);
-
   self.clickedplace = ko.observable();
   self.selectedPlace = ko.observable("");
   self.listViewList = ko.observableArray();
   self.listViewSelectedPlace = ko.observable("");
-
-
   self.onSearch = function(data, event) {
     self.placeList.removeAll();
     if (event.keyCode === 13) {
@@ -322,24 +287,17 @@ var viewModel = function(initialLocation) {
     }
     return true;
   };
-
   self.listViewListClick = function(data, event) {
-
     self.filterResults(data.name, event);
-
   };
-
   self.filterResults = function(data, event) {
-
     var filterloc = data;
-
     // make sure this method is coming from Jquery select event,
     // if so, assign the selected place from dropdown to self.selectedPlace
     if (!(data instanceof ko.observable)) {
       self.selectedPlace = ko.observable(data);
       sourcejquery = true;
     }
-
     // Markers array hide/show
     // Resultsbox - go thru child nodes of
     var map = self.map; {
@@ -379,8 +337,6 @@ var viewModel = function(initialLocation) {
         }
       });
     }
-
-
     return true;
   };
   // End - Intialization
