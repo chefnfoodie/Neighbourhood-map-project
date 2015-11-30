@@ -166,18 +166,7 @@ var proccessWeatherAPIResult = function(viewModel, apiResponse) {
   processFilterView(viewModel);
 };
 
-// Go through added markers array and set the icons as per the temperature
-var resetMarkerColors = function(currentmap) {
 
-  currentmap.markers.forEach(function(currentmarker) {
-    if (currentmarker.temperature == searchPlaceTemp)
-      currentmarker.setIcon('http://maps.google.com/mapfiles/ms/icons/green-dot.png');
-    else if (currentmarker.temperature > searchPlaceTemp)
-      currentmarker.setIcon('http://maps.google.com/mapfiles/ms/icons/red-dot.png');
-    else
-      currentmarker.setIcon('http://maps.google.com/mapfiles/ms/icons/blue-dot.png');
-  });
-};
 
 // Add markers to map
 var addMarker = function(currentmap, helperData) {
@@ -203,19 +192,46 @@ var addMarker = function(currentmap, helperData) {
   helperData.bounds.extend(myLatLng);
 };
 
+// Go through added markers array and set the icons as per the temperature
+var resetMarkerColors = function(currentmap) {
+
+  currentmap.markers.forEach(function(currentmarker) {
+    if (currentmarker.temperature == searchPlaceTemp)
+      currentmarker.setIcon('http://maps.google.com/mapfiles/ms/icons/green-dot.png');
+    else if (currentmarker.temperature > searchPlaceTemp)
+      currentmarker.setIcon('http://maps.google.com/mapfiles/ms/icons/red-dot.png');
+    else
+      currentmarker.setIcon('http://maps.google.com/mapfiles/ms/icons/blue-dot.png');
+  });
+};
+
 var processFilterView = function(viewModel) {
   // Uses jquery-ui library to autocomplete for suggestions
   $("#filterView").autocomplete({
+
     source: viewModel.placeList(),
     close: function(event, ui) {
-      if (viewModel.selectedPlace() === "")
+      if (viewModel.selectedPlace() === "") {
         viewModel.filterResults("", event);
+      }
     },
     select: function(event, ui) {
       if (ui.item.value !== null) {
         viewModel.filterResults(ui.item.value, event);
+        var locationSelected = [];
+        locationSelected.push(ui.item.value);
+        viewModel.filterListViewResults(locationSelected);
       } else
         viewModel.filterResults("", event);
+
+    },
+    open: function( event, ui ) {
+    	filterPlaces = [];
+      $.each( $('.ui-autocomplete > li'), function( index, item ) {
+      	filterPlaces.push(item.firstChild.nodeValue);
+      });
+      viewModel.filterMarkers(filterPlaces);
+      viewModel.filterListViewResults(filterPlaces);
     }
   });
 };
@@ -290,6 +306,47 @@ var viewModel = function(initialLocation) {
   self.listViewListClick = function(data, event) {
     self.filterResults(data.name, event);
   };
+
+  self.filterMarkers = function(filterPlaces) {
+  	var len = filterPlaces.length;
+  	map.markers.forEach(function(currentmarker) {
+  		currentmarker.setVisible(false);
+  	});
+  	for (var k = 0; k < len; k++) {
+  		var currentlocation = filterPlaces[k];
+  			map.markers.forEach(function(currentmarker) {
+  				if(currentmarker.title === currentlocation)
+  					currentmarker.setVisible(true);
+  			});
+  	}
+  }
+
+  self.filterListViewResults = function(filterPlaces) {
+  	var len = filterPlaces.length;
+  	if(len === 0) {
+  		for (var j = 0; j < self.listViewList().length; j++) {
+  			var classtoshow = self.listViewList()[j].name;
+  			$("." + classtoshow ).show();
+  			$("." + classtoshow.split(' ').join('.')).show();
+  		}
+  		return;
+  	}
+
+  	for (var j = 0; j < self.listViewList().length; j++) {
+  		var classtohide = self.listViewList()[j].name;
+  		$("." + classtohide ).hide();
+  		$("." + classtohide.split(' ').join('.') ).hide();
+  	}
+
+  	//$('.Vancouver').hide();
+  	for (var k = 0; k < len; k++) {
+  		var currentlocation = filterPlaces[k];
+  		$("." + currentlocation ).show();
+  		$("." + currentlocation.split(' ').join('.') ).show();
+  	}
+
+  }
+
   self.filterResults = function(data, event) {
     var filterloc = data;
     // make sure this method is coming from Jquery select event,
@@ -314,6 +371,12 @@ var viewModel = function(initialLocation) {
           }
           // Display the marker in its stationary state for each place
           marker.setVisible(true);
+
+          for (var j = 0; j < self.listViewList().length; j++) {
+          	var classtoshow = self.listViewList()[j].name;
+          	$("." + classtoshow ).show();
+          	$("." + classtoshow.split(' ').join('.')).show();
+          }
 
           // If selected listbox place is not equal to existing marker
         } else if (self.selectedPlace() != marker.title) {

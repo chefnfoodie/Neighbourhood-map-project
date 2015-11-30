@@ -13,10 +13,21 @@ body {
 
 }
 
+#weatherName {
+    font-style: normal;
+    font-family: Roboto;
+    font-size: 0.75em;
+    text-decoration: underline;
+    cursor:pointer;
+    color: #DC143C;
+    padding-left: .5em;
+    padding-bottom: .5em;
+}
+
 #weatherResults {
-    padding-left: 2vx;
-    padding-right: 2vx;
-    box-shadow: 0 2vx 6vx rgb(175, 57, 79);
+    padding-left: 2vw;
+    padding-right: 2vw;
+    box-shadow: 0 2vw 6vx rgb(175, 57, 79);
     border-radius: 3px;
     position: absolute;
     top: 30vh;
@@ -29,6 +40,7 @@ body {
     font-size: 2vw;
     overflow-scrolling: touch;
     -webkit-overflow-scrolling: touch;
+    border:  2px solid gray;;
 }
 
 .controls {
