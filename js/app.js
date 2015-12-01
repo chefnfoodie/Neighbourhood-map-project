@@ -33,6 +33,8 @@ function loadInitialMapData(viewModel) {
   // Listen for the event fired when the user selects a location and retrieve
   // more details for that place.
   searchBox.addListener('places_changed', function() {
+  	var input = document.getElementById('pac-input');
+  	searchPlace = input.value;
     var places = searchBox.getPlaces();
     if (places.length === 0) {
       return;
@@ -196,7 +198,8 @@ var addMarker = function(currentmap, helperData) {
 var resetMarkerColors = function(currentmap) {
 
   currentmap.markers.forEach(function(currentmarker) {
-    if (currentmarker.temperature == searchPlaceTemp)
+
+    if (currentmarker.temperature === searchPlaceTemp)
       currentmarker.setIcon('http://maps.google.com/mapfiles/ms/icons/green-dot.png');
     else if (currentmarker.temperature > searchPlaceTemp)
       currentmarker.setIcon('http://maps.google.com/mapfiles/ms/icons/red-dot.png');
