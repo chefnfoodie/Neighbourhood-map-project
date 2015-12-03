@@ -15,6 +15,7 @@ The objective of this project is to search for a location and with the help of G
 * After applying filter, user can enter new location to display its info or enter blank/empty value to show all original markers and weather info.
 * If a place has already been selected from the list box and its marker is bouncing with its infowindow open, on clicking a new place from the list, the previous place marker and infowindow are rendered not visible. The new place marker is seen bouncing at its location with its corresponding infowindow open.
 * If a place is clicked in the scrollable list view, its appropriate marker alone bounces displaying its infowindow.
+* search a new place on the left hand side searchbox to view snippets of news articles.
 
 
 
