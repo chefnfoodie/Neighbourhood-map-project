@@ -1,20 +1,19 @@
 <!DOCTYPE html>
 <html lang="en">
 
-  <head>
-    <meta name="viewport" content="initial-scale=1.0, user-scalable=no">
-    <meta charset="utf-8">
-    <link rel="stylesheet" href="css/style.css">
+<head>
+  <meta name="viewport" content="initial-scale=1.0, user-scalable=no">
+  <meta charset="utf-8">
+  <link rel="stylesheet" href="css/style.css">
 
-    <title>
-      Neighbourhood map project
-    </title>
+  <title>
+    Neighbourhood map project
+  </title>
 
+</head>
 
-  </head>
-
-  <body>
-    <div>
+<body>
+  <div>
 
     <div id="topcontainer">
       <input id="pac-input" class="controls" type="text" placeholder="Select your location" data-bind="value: currentplace, event: {keypress: onSearch}, valueUpdate: 'afterkeydown'" />
@@ -24,29 +23,30 @@
     <div id="map">
     </div>
 
-
-    <div id="weatherResults" >
-      <div  data-bind="foreach: {data: listViewList, as: 'weatherdata'},  value: clickedplace, valueUpdate: 'keyup'">
-        <div data-bind="click: $parent.listViewListClick", style="cursor:pointer">
-        <div id="weatherName" data-bind="text: weatherdata.name, attr: { 'class': weatherdata.name }"></div>
+    <div id="weatherResults">
+      <div data-bind="foreach: {data: listViewList, as: 'weatherdata'},  value: clickedplace, valueUpdate: 'keyup'">
+        <div data-bind="click: $parent.listViewListClick">
+          <div id="weatherName" data-bind="text: weatherdata.name, attr: {'class': weatherdata.name }"></div>
         </div>
       </div>
     </div>
   </div>
 
+  <div id="nytapidiv">
+    <div id="relatedNewsTitle">Related News</div>
+    <div id="relatedNews"></div>
+  </div>
 
-<script type="text/javascript"   src="js/lib/jquery.min.js"></script>
-<script type="text/javascript"  src="js/lib/knockout-3.2.0.js"></script>
+  <script type="text/javascript" src="js/lib/jquery.min.js"></script>
+  <script type="text/javascript" src="js/lib/knockout-3.2.0.js"></script>
 
+  <script type="text/javascript" src="http://code.jquery.com/ui/1.11.4/jquery-ui.js"></script>
+  <link property='stylesheet' rel="stylesheet" href="https://code.jquery.com/ui/1.11.4/themes/smoothness/jquery-ui.css">
 
-
- <script type="text/javascript" src="http://code.jquery.com/ui/1.11.4/jquery-ui.js"></script>
- <link rel="stylesheet" async href="https://code.jquery.com/ui/1.11.4/themes/smoothness/jquery-ui.css">
-
-
-    <script type="text/javascript"  src="js/app.js"></script>
-    <script type="text/javascript" async defer src="https://maps.googleapis.com/maps/api/js?libraries=places&key=AIzaSyDiXj5JWEIMBww17IB1Z_6UrwQohiVAkCs&callback=initializeMap">
-    </script>
+  <script type="text/javascript" src="js/app.js"></script>
+  <script type="text/javascript" async defer src="https://maps.googleapis.com/maps/api/js?libraries=places&amp;key=AIzaSyDiXj5JWEIMBww17IB1Z_6UrwQohiVAkCs&amp;callback=initializeMap">
+  </script>
 
 </body>
+
 </html>

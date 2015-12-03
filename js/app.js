@@ -33,8 +33,8 @@ function loadInitialMapData(viewModel) {
   // Listen for the event fired when the user selects a location and retrieve
   // more details for that place.
   searchBox.addListener('places_changed', function() {
-  	var input = document.getElementById('pac-input');
-  	searchPlace = input.value;
+    var input = document.getElementById('pac-input');
+    searchPlace = input.value;
     var places = searchBox.getPlaces();
     if (places.length === 0) {
       return;
@@ -67,10 +67,48 @@ function loadInitialMapData(viewModel) {
     });
     map.fitBounds(bounds);
     callWeatherAPI(viewModel);
+    callNYTimesArticleAPI(viewModel);
   });
   // load weather data for initial location (Vancouver)
   callWeatherAPI(viewModel);
+  callNYTimesArticleAPI(viewModel);
 }
+
+
+
+function callNYTimesArticleAPI(viewModel) {
+  var nytimesAPIKey = "9b2521936bd38fb2075818578ac0855c%3A6%3A72516684";
+  var requestString = "http://api.nytimes.com/svc/search/v2/articlesearch.json?fq=" + searchPlace + "&sort=newest&api-key=" + nytimesAPIKey;
+  $.ajax({
+    url: requestString,
+    dataType: 'text', // Choosing a text datatype
+    success: function(apiResponse) {
+      processNytimesAPIResult(viewModel, apiResponse);
+    },
+    error: function(XMLHttpRequest, textStatus, errorThrown) {
+      alert("Unable to load data from New York Times now!");
+    }
+  });
+}
+
+var processNytimesAPIResult = function(viewModel, apiResponse) {
+  var newsDiv = document.getElementById("relatedNews");
+  while (newsDiv.firstChild) {
+    newsDiv.removeChild(newsDiv.firstChild);
+  }
+
+  var results = JSON.parse(apiResponse);
+  if (results.response.docs !== null && results.response.docs.length > 0) {
+    var len = results.response.docs.length;
+
+    for (var k = 0; k < len; k++) {
+      var web_url = results.response.docs[k].web_url;
+      var snippet = results.response.docs[k].snippet;
+      var content = "<div id = 'newsItem'> <h4>" + snippet + "</h4>" + "<a target=\"_blank\" href=" + web_url + ">Click here to read</a>";
+      newsDiv.innerHTML = newsDiv.innerHTML + content;
+    }
+  }
+};
 
 // Make Ajax call to OpenWeatherMap API, parse the results and display
 // the markers on map along with weather info on the side box
@@ -228,10 +266,10 @@ var processFilterView = function(viewModel) {
         viewModel.filterResults("", event);
 
     },
-    open: function( event, ui ) {
-    	filterPlaces = [];
-      $.each( $('.ui-autocomplete > li'), function( index, item ) {
-      	filterPlaces.push(item.firstChild.nodeValue);
+    open: function(event, ui) {
+      filterPlaces = [];
+      $.each($('.ui-autocomplete > li'), function(index, item) {
+        filterPlaces.push(item.firstChild.nodeValue);
       });
       viewModel.filterMarkers(filterPlaces);
       viewModel.filterListViewResults(filterPlaces);
@@ -311,44 +349,49 @@ var viewModel = function(initialLocation) {
   };
 
   self.filterMarkers = function(filterPlaces) {
-  	var len = filterPlaces.length;
-  	map.markers.forEach(function(currentmarker) {
-  		currentmarker.setVisible(false);
-  	});
-  	for (var k = 0; k < len; k++) {
-  		var currentlocation = filterPlaces[k];
-  			map.markers.forEach(function(currentmarker) {
-  				if(currentmarker.title === currentlocation)
-  					currentmarker.setVisible(true);
-  			});
-  	}
-  }
+    var len = filterPlaces.length;
+
+    map.markers.forEach(function(currentmarker) {
+      currentmarker.setVisible(false);
+    });
+
+    for (var k = 0; k < len; k++) {
+      var currentlocation = filterPlaces[k];
+      self.displaySelectedMarker(currentlocation);
+    }
+  };
+
+  self.displaySelectedMarker = function(location) {
+    map.markers.forEach(function(currentmarker) {
+      if (currentmarker.title === location)
+        currentmarker.setVisible(true);
+    });
+  };
 
   self.filterListViewResults = function(filterPlaces) {
-  	var len = filterPlaces.length;
-  	if(len === 0) {
-  		for (var j = 0; j < self.listViewList().length; j++) {
-  			var classtoshow = self.listViewList()[j].name;
-  			$("." + classtoshow ).show();
-  			$("." + classtoshow.split(' ').join('.')).show();
-  		}
-  		return;
-  	}
+    var len = filterPlaces.length;
+    if (len === 0) {
+      for (var j = 0; j < self.listViewList().length; j++) {
+        var classtoshow = self.listViewList()[j].name;
+        $("." + classtoshow).show();
+        $("." + classtoshow.split(' ').join('.')).show();
+      }
+      return;
+    }
 
-  	for (var j = 0; j < self.listViewList().length; j++) {
-  		var classtohide = self.listViewList()[j].name;
-  		$("." + classtohide ).hide();
-  		$("." + classtohide.split(' ').join('.') ).hide();
-  	}
+    for (var jj = 0; jj < self.listViewList().length; jj++) {
+      var classtohide = self.listViewList()[jj].name;
+      $("." + classtohide).hide();
+      $("." + classtohide.split(' ').join('.')).hide();
+    }
 
-  	//$('.Vancouver').hide();
-  	for (var k = 0; k < len; k++) {
-  		var currentlocation = filterPlaces[k];
-  		$("." + currentlocation ).show();
-  		$("." + currentlocation.split(' ').join('.') ).show();
-  	}
 
-  }
+    for (var k = 0; k < len; k++) {
+      var currentlocation = filterPlaces[k];
+      $("." + currentlocation).show();
+      $("." + currentlocation.split(' ').join('.')).show();
+    }
+  };
 
   self.filterResults = function(data, event) {
     var filterloc = data;
@@ -376,9 +419,9 @@ var viewModel = function(initialLocation) {
           marker.setVisible(true);
 
           for (var j = 0; j < self.listViewList().length; j++) {
-          	var classtoshow = self.listViewList()[j].name;
-          	$("." + classtoshow ).show();
-          	$("." + classtoshow.split(' ').join('.')).show();
+            var classtoshow = self.listViewList()[j].name;
+            $("." + classtoshow).show();
+            $("." + classtoshow.split(' ').join('.')).show();
           }
 
           // If selected listbox place is not equal to existing marker
